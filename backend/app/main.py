@@ -1,16 +1,25 @@
 import os
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
+from itertools import groupby
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import select
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
 from app.cutoff import WARSAW, is_before_cutoff
 from app.db import Base, SessionLocal, engine, get_db
 from app.models import Order, OrderItem, Product, Store
-from app.schemas import OrderCreate, OrderOut, ProductOut, StoreOut
+from app.schemas import (
+    OrderCreate,
+    OrderOut,
+    PlanCategory,
+    PlanProduct,
+    ProductionPlan,
+    ProductOut,
+    StoreOut,
+)
 from app.seed import seed
 
 
@@ -103,3 +112,39 @@ def create_order(
     db.add(order)
     db.commit()
     return order
+
+
+@app.get("/production-plan", response_model=ProductionPlan)
+def production_plan(
+    plan_date: date = Query(alias="date"),
+    db: Session = Depends(get_db),
+):
+    ordered = (
+        select(OrderItem.product_id, func.sum(OrderItem.quantity).label("quantity"))
+        .join(Order)
+        .where(Order.delivery_date == plan_date)
+        .group_by(OrderItem.product_id)
+        .subquery()
+    )
+    stmt = (
+        select(Product, func.coalesce(ordered.c.quantity, 0))
+        .outerjoin(ordered, ordered.c.product_id == Product.id)
+        .where(or_(Product.active.is_(True), ordered.c.quantity.is_not(None)))
+        .order_by(Product.category, Product.name)
+    )
+    rows = db.execute(stmt).all()
+
+    categories = []
+    for category, group in groupby(rows, key=lambda row: row[0].category):
+        products = [
+            PlanProduct(product_id=p.id, name=p.name, quantity=quantity)
+            for p, quantity in group
+        ]
+        categories.append(
+            PlanCategory(
+                category=category,
+                total=sum(p.quantity for p in products),
+                products=products,
+            )
+        )
+    return ProductionPlan(date=plan_date, categories=categories)
