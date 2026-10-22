@@ -38,13 +38,10 @@ class Product(Base):
 
 class Order(Base):
     __tablename__ = "orders"
-    __table_args__ = (
-        UniqueConstraint("delivery_date", "store_id", name="uq_orders_delivery_date_store"),
-    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     store_id: Mapped[int] = mapped_column(ForeignKey("stores.id", ondelete="RESTRICT"))
-    delivery_date: Mapped[date] = mapped_column(Date)
+    delivery_date: Mapped[date] = mapped_column(Date, index=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
