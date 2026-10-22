@@ -22,17 +22,36 @@
 
 ## Jak korzystałem/am z AI
 
-- Narzędzia:
+- Narzędzia: Claude Code Opus 5.5
 - Przykładowe prompty:
+- „Przeczytaj README i kod szkieletu. Rozpisz plan całości: kolejność zadań, podział
+  na commity i decyzje projektowe. Kodu jeszcze nie piszemy.”
+- „Zmień model: sklep może złożyć kilka zamówień na ten sam dzień, bo może o czymś
+  zapomnieć. Plan produkcji ma sumować wszystkie zamówienia z danego dnia.”
+- „W planie produkcji pokazuj nieaktywne produkty tylko wtedy, gdy mają zamówienia
+  na ten dzień, i dodaj sumę sztuk dla każdej kategorii.”
+- „Frontend: lista produktów zostaje, plan produkcji i formularz zamówienia jako osobne
+  podstrony (react-router). Formularz z cenami i sumą, po złożeniu zamówienia zostaje
+  na stronie z linkiem do planu na ten dzień.”
 
 ## Co zweryfikowałem/am ręcznie
 
--
+- Nowe testy cutoffu padają na starej implementacji czyli faktycznie łapią błąd.
+- Tabele i ograniczenia w Postgresie (`\d orders`, `\d order_items`).
+- `POST /orders` w Swaggerze: poprawne zamówienie, drugie na ten sam dzień, data dziś, nieaktywny produkt.
+- Widok planu w przeglądarce: dzień z zamówieniami, dzień bez zamówień, ładowanie.
+- Formularz zamówienia: pusty formularz, błąd z backendu, poprawne zamówienie i link do planu.
 
 ## Gdzie AI się pomyliło / co poprawiłem/am
 
--
+- AI założyło jedno zamówienie na sklep na dzień zmieniłem, bo sklep może chcieć coś domówić.
+- AI dopisało testy modelu, których README nie wymagało usunąłem, zostawiłem tylko potrzebne.
+- AI dodawało w kodzie zbędne komentarze usunąłem je przed commitem.
 
 ## Co dalej przy większej ilości czasu
 
--
+- Konta i role: sklep (składa zamówienia tylko dla siebie – `store_id` brany z konta,
+  a nie z formularza), produkcja (widzi plan), admin (zarządza produktami i cenami).
+- Edycja i anulowanie zamówienia do godziny cutoff.
+- Testy na prawdziwym Postgresie zamiast SQLite.
+
