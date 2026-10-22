@@ -7,6 +7,19 @@ export type Product = {
   unit_price: string;
 };
 
+export type Store = {
+  id: number;
+  name: string;
+  address: string;
+};
+
+export type OrderOut = {
+  id: number;
+  store_id: number;
+  delivery_date: string;
+  items: { product_id: number; quantity: number; unit_price: string }[];
+};
+
 export type PlanProduct = {
   product_id: number;
   name: string;

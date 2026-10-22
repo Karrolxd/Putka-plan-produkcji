@@ -1,4 +1,5 @@
 import { NavLink, Route, Routes } from "react-router-dom";
+import OrderForm from "./OrderForm";
 import ProductList from "./ProductList";
 import ProductionPlan from "./ProductionPlan";
 
@@ -13,6 +14,7 @@ export default function App() {
             Produkty
           </NavLink>
           <NavLink to="/plan">Plan produkcji</NavLink>
+          <NavLink to="/zamowienie">Nowe zamówienie</NavLink>
         </nav>
       </header>
 
@@ -27,6 +29,7 @@ export default function App() {
           }
         />
         <Route path="/plan" element={<ProductionPlan />} />
+        <Route path="/zamowienie" element={<OrderForm />} />
       </Routes>
     </main>
   );
